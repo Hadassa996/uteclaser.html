@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>UTEC LASER • Calculadora de Dobra (Prensa Hidráulica)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #020617;
+      --primary: #38bdf8;
+      --primary-dark: #0ea5e9;
+      --text: #ffffff;
+      --muted: #94a3b8;
+      --border: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+    }
+
+    .app {
+      width: 1100px;
+      max-width: 96%;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) { .app { grid-template-columns: 1fr; } }
+
+    .brand {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 22px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+    }
+    .brand h1 { margin: 0; font-size: 22px; letter-spacing: 0.4px; }
+    .brand span { color: var(--primary); font-weight: 700; }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(56,189,248,0.15);
+      color: var(--primary);
+      border: 1px solid rgba(56,189,248,0.3);
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+    }
+
+    .card h2 { margin: 0 0 16px 0; font-size: 18px; font-weight: 600; }
+
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+
+    .field label { font-size: 12px; color: var(--muted); }
+
+    .field input, .field select {
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(56,189,248,0.15);
+    }
+
+    .actions { display: flex; gap: 12px; margin-top: 18px; }
+    button {
+      flex: 1;
+      border-radius: 14px;
+      border: none;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #020617; }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+
+    .result { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .metric { background: #020617; border-radius: 16px; padding: 16px; border: 1px solid var(--border); }
+    .metric h3 { margin: 0 0 6px 0; font-size: 12px; font-weight: 500; color: var(--muted); }
+    .metric strong { font-size: 20px; color: var(--primary); }
+
+    .footer { grid-column: 1 / -1; text-align: center; font-size: 12px; color: var(--muted); margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <div class="brand">
+      <h1><span>UTEC LASER</span> • Calculadora de Dobra</h1>
+      <div class="badge">Prensa Dobradeira Hidráulica</div>
+    </div>
+
+    <div class="card">
+      <h2>Parâmetros</h2>
+
+      <div class="grid">
+        <div class="field">
+          <label>Espessura (mm)</label>
+          <input id="espessura" type="number" step="0.01" placeholder="Ex: 2" />
+        </div>
+
+        <div class="field">
+          <label>Comprimento da Dobra (mm)</label>
+          <input id="largura" type="number" step="1" placeholder="Ex: 1000" />
+        </div>
+
+        <div class="field">
+          <label>Abertura do V (mm)</label>
+          <input id="aberturaV" type="number" step="0.1" placeholder="Ex: 16" />
+        </div>
+
+        <div class="field">
+          <label>Ângulo de Dobra (°)</label>
+          <input id="angulo" type="number" step="0.1" placeholder="Ex: 90" />
+        </div>
+
+        <div class="field">
+          <label>Raio Interno (mm) (opcional)</label>
+          <input id="raio" type="number" step="0.01" placeholder="Se vazio, estima pelo V" />
+        </div>
+
+        <div class="field">
+          <label>Material (força)</label>
+          <select id="material">
+            <option value="1.0">Aço Carbono</option>
+            <option value="1.2">Aço Inox</option>
+            <option value="0.7">Alumínio</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>K-Factor (desenvolvimento)</label>
+          <select id="kfactor">
+            <option value="0.33">0.33 (aço carbono)</option>
+            <option value="0.45">0.45 (inox)</option>
+            <option value="0.40">0.40 (alumínio)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Aba A (mm)</label>
+          <input id="abaA" type="number" step="0.1" placeholder="Ex: 50" />
+        </div>
+
+        <div class="field">
+          <label>Aba B (mm)</label>
+          <input id="abaB" type="number" step="0.1" placeholder="Ex: 30" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" onclick="calcular()">Calcular</button>
+        <button class="btn-secondary" onclick="limpar()">Limpar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Resultado</h2>
+
+      <div class="result">
+        <div class="metric">
+          <h3>Força Necessária</h3>
+          <strong id="forcaTon">0.00 t</strong>
+        </div>
+
+        <div class="metric">
+          <h3>Equivalente</h3>
+          <strong id="forcaKN">0.00 kN</strong>
+        </div>
+
+        <div class="metric">
+          <h3>Tonelada por Metro</h3>
+          <strong id="tonMetro">0.00 t/m</strong>
+        </div>
+
+        <div class="metric">
+          <h3>Capacidade Mínima (c/ segurança)</h3>
+          <strong id="capacidadeRec">0.00 t</strong>
+        </div>
+
+        <div class="metric">
+          <h3>BA (Bend Allowance)</h3>
+          <strong id="ba">0.00 mm</strong>
+        </div>
+
+        <div class="metric">
+          <h3>BD (Bend Deduction)</h3>
+          <strong id="bd">0.00 mm</strong>
+        </div>
+
+        <div class="metric">
+          <h3>Raio usado no cálculo</h3>
+          <strong id="raioCalc">0.00 mm</strong>
+        </div>
+
+        <div class="metric">
+          <h3>Comprimento Desenvolvido</h3>
+          <strong id="flat">0.00 mm</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">© Utec Laser • Máquinas de Corte, Dobra e Solda a Laser</div>
+  </div>
+
+  <script>
+    "use strict";
+
+    // ---------- FORÇA (DOBRA AO AR) ----------
+    function calcularForca(espessura, comprimento, aberturaV, coefMaterial, fatorSeguranca = 1.3) {
+      if ([espessura, comprimento, aberturaV, coefMaterial].some(v => isNaN(v) || v <= 0)) {
+        throw new Error("Parâmetros inválidos para força");
+      }
+
+      // Força (kN) = (1.42 × coefMaterial × L(mm) × t²) / V(mm)
+      const CONSTANTE = 1.42;
+
+      const forcaKN = (CONSTANTE * coefMaterial * comprimento * Math.pow(espessura, 2)) / aberturaV;
+      const forcaTon = forcaKN / 9.81;
+
+      const comprimentoMetro = comprimento / 1000;
+      const tonMetro = forcaTon / comprimentoMetro;
+
+      const capacidadeRecomendada = forcaTon * fatorSeguranca;
+
+      return { forcaTon, forcaKN, tonMetro, capacidadeRecomendada };
+    }
+
+    // ---------- DESENVOLVIMENTO (BA / BD / FLAT) ----------
+    function calcularDesenvolvimento(espessura, anguloGraus, raioInterno, aberturaV, abaA, abaB, kFactor) {
+      if ([espessura, anguloGraus, aberturaV, abaA, abaB, kFactor].some(v => isNaN(v) || v <= 0)) {
+        throw new Error("Parâmetros inválidos para desenvolvimento");
+      }
+
+      // Se não informar raio, estima para dobra ao ar:
+      // regra prática: Ri ≈ V/6 (aço). Funciona bem como estimativa inicial.
+      let Ri = raioInterno;
+      if (isNaN(Ri) || Ri <= 0) Ri = aberturaV / 6;
+
+      // Converter graus -> rad
+      const A = anguloGraus * (Math.PI / 180);
+
+      // Bend Allowance (BA) = A(rad) * (Ri + K*t)
+      const BA = A * (Ri + (kFactor * espessura));
+
+      // Setback (SB) = (Ri + t) * tan(A/2)
+      const SB = (Ri + espessura) * Math.tan(A / 2);
+
+      // Bend Deduction (BD) = 2*SB - BA
+      const BD = (2 * SB) - BA;
+
+      // Flat length = AbaA + AbaB - BD
+      const FLAT = abaA + abaB - BD;
+
+      return { BA, BD, FLAT, Ri };
+    }
+
+    function calcular() {
+      try {
+        const espessura = parseFloat(document.getElementById("espessura").value);
+        const comprimento = parseFloat(document.getElementById("largura").value);
+        const aberturaV = parseFloat(document.getElementById("aberturaV").value);
+        const angulo = parseFloat(document.getElementById("angulo").value);
+        const raio = parseFloat(document.getElementById("raio").value);
+        const coefMaterial = parseFloat(document.getElementById("material").value);
+
+        const kFactor = parseFloat(document.getElementById("kfactor").value);
+        const abaA = parseFloat(document.getElementById("abaA").value);
+        const abaB = parseFloat(document.getElementById("abaB").value);
+
+        // Força
+        const f = calcularForca(espessura, comprimento, aberturaV, coefMaterial);
+
+        // Desenvolvimento
+        const d = calcularDesenvolvimento(espessura, angulo, raio, aberturaV, abaA, abaB, kFactor);
+
+        // ✅ AQUI estava o bug no seu código: faltavam crases
+        document.getElementById("forcaTon").innerText = `${f.forcaTon.toFixed(2)} t`;
+        document.getElementById("forcaKN").innerText = `${f.forcaKN.toFixed(2)} kN`;
+        document.getElementById("tonMetro").innerText = `${f.tonMetro.toFixed(2)} t/m`;
+        document.getElementById("capacidadeRec").innerText = `${f.capacidadeRecomendada.toFixed(2)} t`;
+
+        document.getElementById("ba").innerText = `${d.BA.toFixed(2)} mm`;
+        document.getElementById("bd").innerText = `${d.BD.toFixed(2)} mm`;
+        document.getElementById("flat").innerText = `${d.FLAT.toFixed(2)} mm`;
+        document.getElementById("raioCalc").innerText = `${d.Ri.toFixed(2)} mm`;
+
+      } catch (err) {
+        alert("Preencha corretamente os campos obrigatórios (incluindo Aba A e Aba B).");
+        console.error(err);
+      }
+    }
+
+    function limpar() {
+      document.querySelectorAll("input").forEach(i => i.value = "");
+      document.getElementById("forcaTon").innerText = "0.00 t";
+      document.getElementById("forcaKN").innerText = "0.00 kN";
+      document.getElementById("tonMetro").innerText = "0.00 t/m";
+      document.getElementById("capacidadeRec").innerText = "0.00 t";
+
+      document.getElementById("ba").innerText = "0.00 mm";
+      document.getElementById("bd").innerText = "0.00 mm";
+      document.getElementById("flat").innerText = "0.00 mm";
+      document.getElementById("raioCalc").innerText = "0.00 mm";
+    }
+  </script>
+</body>
+</html>
